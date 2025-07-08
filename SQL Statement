@@ -1,0 +1,414 @@
+---------------------------------------------------
+-- File           : Project_Implementation.sql
+-- Desc           : Cardiology clinic data implementation
+-- Author         :
+-- Create Date    : June 6th, 2025
+---------------------------------------------------
+
+-- CREATE TABLES FOR ALL VARIABLES
+
+CREATE TABLE Patient (
+    PatientID CHAR(12) PRIMARY KEY,
+    PatientName VARCHAR2(25) NOT NULL,
+    DateOfBirth DATE,
+    PatientGender VARCHAR2(25) NOT NULL,
+    PatientPhone CHAR(10),
+    PatientEmail VARCHAR2(25) NOT NULL,
+    PatientAddress VARCHAR2(25) NOT NULL,
+    InsuranceProvider VARCHAR2(25) NOT NULL
+);
+
+CREATE TABLE Doctor (
+    DoctorID CHAR(12) PRIMARY KEY,
+    DoctorName VARCHAR2(25) NOT NULL,
+    Speciality VARCHAR2(25) NOT NULL,
+    DoctorPhone CHAR(10),
+    DoctorEmail VARCHAR2(25) NOT NULL
+);
+
+CREATE TABLE Medication (
+    MedicationID CHAR(10) PRIMARY KEY,
+    Name VARCHAR2(50) NOT NULL,
+    Dosage VARCHAR2(20) NOT NULL,
+    Frequency VARCHAR2(30) NOT NULL
+);
+
+CREATE TABLE Prescription (
+    PrescriptionID CHAR(10) PRIMARY KEY,
+    PatientID CHAR(12),
+    MedicationID CHAR(10),
+    PrescribedBy CHAR(12),
+    StartDate DATE NOT NULL,
+    EndDate DATE,
+    FOREIGN KEY (PatientID) REFERENCES Patient(PatientID),
+    FOREIGN KEY (MedicationID) REFERENCES Medication(MedicationID),
+    FOREIGN KEY (PrescribedBy) REFERENCES Doctor(DoctorID)
+);
+
+CREATE TABLE Test (
+    TestID CHAR(10) PRIMARY KEY,
+    TestType VARCHAR2(20) NOT NULL,
+    ResultSummary VARCHAR2(100),
+    TestDate DATE NOT NULL,
+    OrderedByDoctorID CHAR(12),
+    PatientID CHAR(12),
+    FOREIGN KEY (OrderedByDoctorID) REFERENCES Doctor(DoctorID),
+    FOREIGN KEY (PatientID) REFERENCES Patient(PatientID)
+);
+
+CREATE TABLE Referral (
+    ReferralID CHAR(10) PRIMARY KEY,
+    ReferredTo VARCHAR2(100) NOT NULL,
+    Reason VARCHAR2(255) NOT NULL,
+    ReferralDate DATE NOT NULL,
+    ReferralStatus VARCHAR2(20) NOT NULL,
+    PatientID CHAR(12) NOT NULL,
+    ReferringDoctorID CHAR(12) NOT NULL,
+    SpecialistDoctorID CHAR(12),
+    FOREIGN KEY (PatientID) REFERENCES Patient(PatientID),
+    FOREIGN KEY (ReferringDoctorID) REFERENCES Doctor(DoctorID),
+    FOREIGN KEY (SpecialistDoctorID) REFERENCES Doctor(DoctorID)
+);
+
+CREATE TABLE Billing (
+    BillingID CHAR(10) PRIMARY KEY,
+    Amount NUMBER(10,2) NOT NULL,
+    BillingDate DATE NOT NULL,
+    PaymentStatus VARCHAR2(20) NOT NULL,
+    InsuranceClaimed VARCHAR2(3) NOT NULL,
+    PatientID CHAR(12) NOT NULL,
+    FOREIGN KEY (PatientID) REFERENCES Patient(PatientID)
+);
+
+CREATE TABLE Visit (
+    VisitID CHAR(12) PRIMARY KEY,
+    VisitDate DATE,
+    Reason VARCHAR2(500),
+    Notes VARCHAR2(500),
+    PatientID CHAR(12),
+    DoctorID CHAR(12),
+    FOREIGN KEY (PatientID) REFERENCES Patient(PatientID),
+    FOREIGN KEY (DoctorID) REFERENCES Doctor(DoctorID)
+);
+
+CREATE TABLE Diagnosis (
+    DiagnosisID CHAR(12) PRIMARY KEY,
+    DiagnosisName VARCHAR2(50),
+    DiagnosisDescription VARCHAR2(500),
+    ICDCode CHAR(20)
+);
+
+CREATE TABLE PatientDiagnosis (
+    DateDiagnosed DATE,
+    PatientID CHAR(12),
+    DiagnosisID CHAR(12),
+    DoctorID CHAR(12),
+    PRIMARY KEY (PatientID, DiagnosisID, DateDiagnosed),
+    FOREIGN KEY (PatientID) REFERENCES Patient(PatientID),
+    FOREIGN KEY (DiagnosisID) REFERENCES Diagnosis(DiagnosisID),
+    FOREIGN KEY (DoctorID) REFERENCES Doctor(DoctorID)
+);
+
+--PatientDiagnosis
+INSERT INTO Diagnosis (DiagnosisID, DiagnosisName, DiagnosisDescription, ICDCode) VALUES
+('DIAG001', 'Hypertension', 'High blood pressure', 'I10');
+INSERT INTO Diagnosis (DiagnosisID, DiagnosisName, DiagnosisDescription, ICDCode) VALUES
+('DIAG002', 'Diabetes Type 2', 'Chronic condition affecting sugar metabolism', 'E11');
+INSERT INTO Diagnosis (DiagnosisID, DiagnosisName, DiagnosisDescription, ICDCode) VALUES
+('DIAG003', 'Hyperlipidemia', 'High cholesterol', 'E78.5');
+INSERT INTO Diagnosis (DiagnosisID, DiagnosisName, DiagnosisDescription, ICDCode) VALUES
+('DIAG004', 'Anxiety Disorder', 'Generalized anxiety disorder', 'F41.1');
+INSERT INTO Diagnosis (DiagnosisID, DiagnosisName, DiagnosisDescription, ICDCode) VALUES
+('DIAG005', 'Asthma', 'Chronic respiratory condition', 'J45.9');
+
+
+--Doctor
+INSERT INTO doctor (DOCTORID, DOCTORNAME, SPECIALITY, DOCTORPHONE, DOCTOREMAIL) 
+VALUES ('DOC001', 'DR. P', 'SURGEON', '1357924680', 'DRP@CARDIOLOGY.COM'); 
+INSERT INTO doctor (DOCTORID, DOCTORNAME, SPECIALITY, DOCTORPHONE, DOCTOREMAIL) 
+VALUES ('DOC002', 'DR. A', 'ENDOCRINOLOGIST', '2223334444', 'DRA@CARDIOLOGY.COM'); 
+INSERT INTO doctor (DOCTORID, DOCTORNAME, SPECIALITY, DOCTORPHONE, DOCTOREMAIL) 
+VALUES ('DOC003', 'DR. T', 'CARDIOLOGIST', '9998887777', 'DRT@CARDIOLOGY.COM'); 
+INSERT INTO doctor (DOCTORID, DOCTORNAME, SPECIALITY, DOCTORPHONE, DOCTOREMAIL) 
+VALUES ('DOC004', 'DR. B', 'CARDIOLOGIST', '0004446666', 'DRB@CARDIOLOGY.COM'); 
+INSERT INTO doctor (DOCTORID, DOCTORNAME, SPECIALITY, DOCTORPHONE, DOCTOREMAIL) 
+VALUES ('DOC005', 'DR. N', 'SURGEON', '2229998888', 'DRN@CARDIOLOGY.COM'); 
+
+
+--Patient
+INSERT INTO Patient (PATIENTID, PATIENTNAME, DATEOFBIRTH, PATIENTGENDER, PATIENTPHONE, PATIENTEMAIL, PATIENTADDRESS, INSURANCEPROVIDER) 
+VALUES ('PAT001', 'BOB CAT', TO_DATE ('01-01-1950', 'DD-MM-YYYY'), 'MALE', '1112223333', 'BOB123@GMAIL.COM', '123 MAJOR ROAD', 'MEDICARE'); 
+INSERT INTO Patient (PATIENTID, PATIENTNAME, DATEOFBIRTH, PATIENTGENDER, PATIENTPHONE, PATIENTEMAIL, PATIENTADDRESS, INSURANCEPROVIDER) 
+VALUES ('PAT002', 'JACK FROST', TO_DATE ('01-02-1970', 'DD-MM-YYYY'), 'MALE', '1234567890', 'JACKFROST@GMAIL.COM', '123AVE', 'MEDICARE'); 
+INSERT INTO Patient (PATIENTID, PATIENTNAME, DATEOFBIRTH, PATIENTGENDER, PATIENTPHONE, PATIENTEMAIL, PATIENTADDRESS, INSURANCEPROVIDER) 
+VALUES ('PAT003', 'JACK RYAN', TO_DATE ('21-05-1984', 'DD-MM-YYYY'), 'MALE', '9876543212', 'JACKRYAN@GMAIL.COM', '345ROAD', 'AETNA'); 
+INSERT INTO Patient (PATIENTID, PATIENTNAME, DATEOFBIRTH, PATIENTGENDER, PATIENTPHONE, PATIENTEMAIL, PATIENTADDRESS, INSURANCEPROVIDER) 
+VALUES ('PAT004', 'LILY COLINS', TO_DATE ('11-02-1966', 'DD-MM-YYYY'), 'FEMALE', '4567891234', 'LILY@HOTMAIL.COM', '123AVE', 'UNITED HEALTHCARE'); 
+INSERT INTO Patient (PATIENTID, PATIENTNAME, DATEOFBIRTH, PATIENTGENDER, PATIENTPHONE, PATIENTEMAIL, PATIENTADDRESS, INSURANCEPROVIDER) 
+VALUES ('PAT005', 'HERMIONE GRANGER', TO_DATE ('14-10-1995', 'DD-MM-YYYY'), 'FEMALE', '5552228888', 'GRANGER@HOTMAIL.COM', '45 BOB ST', 'MEDICAID'); 
+
+
+--Medication
+INSERT INTO Medication (MedicationID, Name, Dosage, Frequency) VALUES 
+('MED001', 'Paracetamol', '500mg', 'Twice a day'); 
+INSERT INTO Medication (MedicationID, Name, Dosage, Frequency) VALUES 
+('MED002', 'Amoxicillin', '250mg', 'Three times a day'); 
+INSERT INTO Medication (MedicationID, Name, Dosage, Frequency) VALUES 
+('MED003', 'Ibuprofen', '400mg', 'Once a day');
+INSERT INTO Medication (MedicationID, Name, Dosage, Frequency) VALUES 
+('MED004', 'Metformin', '850mg', 'Twice a day'); 
+INSERT INTO Medication (MedicationID, Name, Dosage, Frequency) VALUES 
+('MED005', 'Lisinopril', '10mg', 'Once a day'); 
+
+
+--Visit 
+INSERT INTO Visit (visitID, visitDate, reason, notes, patientID, doctorID) 
+VALUES ('V001', TO_DATE('01-03-2024', 'DD-MM-YYYY'), 'Chest Pain', 'Patient reports mild chest discomfort after exertion.', 'PAT001', 'DOC003'); 
+INSERT INTO Visit (visitID, visitDate, reason, notes, patientID, doctorID) 
+VALUES ('V002', TO_DATE('05-03-2024', 'DD-MM-YYYY'), 'Shortness of Breath', 'History of hypertension, ordered ECG.', 'PAT002', 'DOC003'); 
+INSERT INTO Visit (visitID, visitDate, reason, notes, patientID, doctorID) 
+VALUES ('V003', TO_DATE('10-03-2024', 'DD-MM-YYYY'), 'Abdominal Pain', 'Possible appendicitis. Referred to surgery.', 'PAT003', 'DOC002'); 
+INSERT INTO Visit (visitID, visitDate, reason, notes, patientID, doctorID) 
+VALUES ('V004', TO_DATE('15-03-2024', 'DD-MM-YYYY'), 'Palpitations', 'Patient advised stress test.', 'PAT004', 'DOC004'); 
+INSERT INTO Visit (visitID, visitDate, reason, notes, patientID, doctorID) 
+VALUES ('V005', TO_DATE('20-03-2024', 'DD-MM-YYYY'), 'Gallbladder Pain', 'Ultrasound ordered, likely gallstones.', 'PAT005', 'DOC002'); 
+INSERT INTO Visit (visitID, visitDate, reason, notes, patientID, doctorID) 
+VALUES ('V006', TO_DATE('25-03-2024', 'DD-MM-YYYY'), 'Follow-up', 'Reviewed test results, condition stable.', 'PAT002', 'DOC003');
+
+
+--Test
+INSERT INTO Test (TestID, TestType, ResultSummary, TestDate, OrderedByDoctorID, PatientID) VALUES 
+('TEST001', 'EKG', 'Normal sinus rhythm', TO_DATE('2025-05-12', 'YYYY-MM-DD'), 'DOC001', 'PAT001');
+INSERT INTO Test (TestID, TestType, ResultSummary, TestDate, OrderedByDoctorID, PatientID) VALUES 
+('TEST002', 'Echo', 'Mild mitral valve prolapse', TO_DATE('2025-05-13', 'YYYY-MM-DD'), 'DOC002', 'PAT002'); 
+INSERT INTO Test (TestID, TestType, ResultSummary, TestDate, OrderedByDoctorID, PatientID) VALUES 
+('TEST003', 'Blood Test', 'Elevated cholesterol', TO_DATE('2025-05-14', 'YYYY-MM-DD'), 'DOC003', 'PAT003'); 
+INSERT INTO Test (TestID, TestType, ResultSummary, TestDate, OrderedByDoctorID, PatientID) VALUES 
+('TEST004', 'MRI', 'No abnormalities detected', TO_DATE('2025-05-15', 'YYYY-MM-DD'), 'DOC001', 'PAT004');
+INSERT INTO Test (TestID, TestType, ResultSummary, TestDate, OrderedByDoctorID, PatientID) VALUES 
+('TEST005', 'X-Ray', 'Fracture healing well', TO_DATE('2025-05-16', 'YYYY-MM-DD'), 'DOC002', 'PAT005');
+
+
+--Patient Diagnosis
+INSERT INTO PATIENTDIAGNOSIS (DateDiagnosed, PatientID, DiagnosisID, DOCTORID) VALUES
+(TO_DATE('2025-05-01', 'YYYY-MM-DD'), 'PAT001','DIAG001', 'DOC001');
+INSERT INTO PATIENTDIAGNOSIS (DateDiagnosed, PatientID, DiagnosisID, DOCTORID) VALUES
+(TO_DATE('2025-04-20', 'YYYY-MM-DD'), 'PAT002', 'DIAG002', 'DOC002');
+INSERT INTO PATIENTDIAGNOSIS (DateDiagnosed, PatientID, DiagnosisID, DOCTORID) VALUES
+(TO_DATE('2025-05-10', 'YYYY-MM-DD'),'PAT003','DIAG003','DOC003');
+INSERT INTO PATIENTDIAGNOSIS (DateDiagnosed, PatientID, DiagnosisID, DOCTORID) VALUES
+(TO_DATE('2025-05-18', 'YYYY-MM-DD'), 'PAT004','DIAG004','DOC004');
+INSERT INTO PATIENTDIAGNOSIS (DateDiagnosed, PatientID, DiagnosisID, DOCTORID) VALUES
+(TO_DATE('2025-05-18', 'YYYY-MM-DD'), 'PAT005','DIAG005','DOC005');
+
+
+--Prescription
+INSERT INTO Prescription (PrescriptionID, PatientID, MedicationID, PrescribedBy, StartDate, EndDate) VALUES 
+('PR001', 'PAT001', 'MED001', 'DOC001', TO_DATE('2025-05-01', 'YYYY-MM-DD'), TO_DATE('2025-05-07', 'YYYY-MM-DD')); 
+INSERT INTO Prescription (PrescriptionID, PatientID, MedicationID, PrescribedBy, StartDate, EndDate) VALUES 
+('PR002', 'PAT002', 'MED002', 'DOC002', TO_DATE('2025-04-20', 'YYYY-MM-DD'), TO_DATE('2025-05-05', 'YYYY-MM-DD'));
+INSERT INTO Prescription (PrescriptionID, PatientID, MedicationID, PrescribedBy, StartDate, EndDate) VALUES 
+('PR003', 'PAT001', 'MED003', 'DOC001', TO_DATE('2025-05-10', 'YYYY-MM-DD'), NULL);
+INSERT INTO Prescription (PrescriptionID, PatientID, MedicationID, PrescribedBy, StartDate, EndDate) VALUES 
+('PR004', 'PAT003', 'MED004', 'DOC003', TO_DATE('2025-05-15', 'YYYY-MM-DD'), TO_DATE('2025-06-15', 'YYYY-MM-DD')); 
+INSERT INTO Prescription (PrescriptionID, PatientID, MedicationID, PrescribedBy, StartDate, EndDate) VALUES 
+('PR005', 'PAT004', 'MED005', 'DOC002', TO_DATE('2025-05-18', 'YYYY-MM-DD'), NULL);
+
+
+--Referral
+INSERT INTO Referral ( referralID, referredTo, reason, referralDate, referralstatus, patientID, referringDoctorID, specialistDoctorID ) VALUES ( 'REF001', 'Cardiology', 'Chest pain', TO_DATE('2025-05-01','YYYY-MM-DD'), 'Open', 'PAT001', 'DOC001', 'DOC002' ); 
+INSERT INTO Referral ( referralID, referredTo, reason, referralDate, referralstatus, patientID, referringDoctorID, specialistDoctorID ) VALUES ( 'REF002', 'Neurology', 'Chronic headaches', TO_DATE('2025-05-03','YYYY-MM-DD'), 'Pending', 'PAT002', 'DOC002', 'DOC003' ); 
+INSERT INTO Referral ( referralID, referredTo, reason, referralDate, referralstatus, patientID, referringDoctorID, specialistDoctorID ) VALUES ( 'REF003', 'Orthopedics', 'Knee pain', TO_DATE('2025-05-05','YYYY-MM-DD'), 'Open', 'PAT003', 'DOC001', 'DOC004' ); 
+INSERT INTO Referral ( referralID, referredTo, reason, referralDate, referralstatus, patientID, referringDoctorID, specialistDoctorID ) VALUES ( 'REF004', 'Endocrinology', 'Uncontrolled diabetes', TO_DATE('2025-05-07','YYYY-MM-DD'), 'Closed', 'PAT004', 'DOC003', 'DOC005' ); 
+INSERT INTO Referral ( referralID, referredTo, reason, referralDate, referralstatus, patientID, referringDoctorID, specialistDoctorID ) VALUES ( 'REF005', 'Gastroenterology', 'Abdominal cramps', TO_DATE('2025-05-10','YYYY-MM-DD'), 'Pending', 'PAT005', 'DOC004', 'DOC002' ); 
+
+
+--Billing
+INSERT INTO Billing ( billingID, amount, billingDate, paymentStatus, insuranceClaimed, patientID ) VALUES ( 'BIL001', 250.00, TO_DATE('2025-05-02','YYYY-MM-DD'), 'Paid', 'Yes', 'PAT001' ); 
+INSERT INTO Billing ( billingID, amount, billingDate, paymentStatus, insuranceClaimed, patientID ) VALUES ( 'BIL002', 1500.50, TO_DATE('2025-05-04','YYYY-MM-DD'), 'Due', 'No', 'PAT002' ); 
+INSERT INTO Billing ( billingID, amount, billingDate, paymentStatus, insuranceClaimed, patientID ) VALUES ( 'BIL003', 75.75, TO_DATE('2025-05-06','YYYY-MM-DD'), 'Overdue', 'Yes', 'PAT003' ); 
+INSERT INTO Billing ( billingID, amount, billingDate, paymentStatus, insuranceClaimed, patientID ) VALUES ( 'BIL004', 300.00, TO_DATE('2025-05-08','YYYY-MM-DD'), 'Paid', 'No', 'PAT004' ); 
+INSERT INTO Billing ( billingID, amount, billingDate, paymentStatus, insuranceClaimed, patientID ) VALUES ( 'BIL005', 425.25, TO_DATE('2025-05-11','YYYY-MM-DD'), 'Due', 'Yes', 'PAT005' ); 
+
+
+SELECT * FROM Patient;
+SELECT * FROM Doctor;
+SELECT * FROM Medication;
+SELECT * FROM Prescription;
+SELECT * FROM Test;
+SELECT * FROM Referral;
+SELECT * FROM Billing;
+SELECT * FROM Visit
+SELECT * FROM Diagnosis;
+SELECT * FROM PatientDiagnosis;
+
+--------------------------------------------------------------------------------
+-- PART 3: DATA QUERIES (Insiya)
+--------------------------------------------------------------------------------
+-- Insiya Neemuchwala
+-- Query 1: List all visits with patient name, doctor name, and reason
+SELECT 
+    v.visitID,
+    p.PATIENTNAME,
+    d.DOCTORNAME,
+    v.visitDate,
+    v.reason
+FROM 
+    Visit v
+JOIN Patient p ON v.patientID = p.PATIENTID
+JOIN Doctor d ON v.doctorID = d.DOCTORID;
+
+-- Query 2: Count the number of visits per doctor
+SELECT 
+    d.DOCTORNAME,
+    COUNT(v.visitID) AS total_visits
+FROM 
+    Doctor d
+LEFT JOIN Visit v ON d.DOCTORID = v.doctorID
+GROUP BY d.DOCTORNAME;
+
+-- Query 3: List patients who have visited more than once
+SELECT 
+    p.PATIENTNAME,
+    COUNT(v.visitID) AS visit_count
+FROM 
+    Visit v
+JOIN Patient p ON v.patientID = p.PATIENTID
+GROUP BY p.PATIENTNAME
+HAVING COUNT(v.visitID) > 1;
+
+-- == UPDATE Example ==
+-- Objective: Update the phone number for patient 'LILY COLINS' from 4567891234 to 4567891243.
+
+--Before the update: 
+SELECT PATIENTNAME, PATIENTPHONE 
+FROM Patient 
+WHERE PATIENTNAME = 'LILY COLINS';
+
+--After the update:
+UPDATE PATIENTPHONE
+    SET PATIENTPHONE = '4567891243'
+WHERE PATIENTNAME = 'LILY COLINS';
+SELECT * FROM PATIENT WHERE PATIENTID = 'PAT004';
+
+-- == DELETE example ==
+-- Objective: Remove Dr. N as he is now retired.
+
+--Before the update:
+SELECT * FROM DOCTOR WHERE DOCTORID = 'DOC005';
+
+--After Update:
+DELETE FROM DOCTOR
+WHERE DOCTORID = 'DOC005';
+
+--Running below statement will show no results
+SELECT * FROM DOCTOR WHERE DOCTORID = 'DOC005';
+
+--------------------------------------------------------------
+-- DATA QUERIES (Michelle)
+--------------------------------------------------------------
+--Update and delete example
+
+UPDATE BILLING
+SET AMOUNT = 895.78
+WHERE BILLINGID = 'BIL001';
+
+DELETE FROM REFERRAL
+WHERE PATIENTID = 'PAT003';
+
+--Query 1
+-- This table shows the total amount of charges each patient has, the patient’s ID number, and name.
+
+SELECT p.PATIENTID, p.PATIENTNAME, SUM(b.AMOUNT) as BillingAmount
+FROM PATIENT p JOIN BILLING b
+    ON p.PATIENTID = b.PATIENTID
+GROUP BY p.PATIENTID, p.PATIENTNAME;
+
+--Query 2
+-- This table shows how many prescriptions each doctor has written. 
+
+SELECT d.DOCTORNAME, COUNT(rx.PrescriptionID) as PrescriptionCount
+FROM DOCTOR d JOIN PRESCRIPTION rx 
+    ON d.DOCTORID = rx.PRESCRIBEDBY
+GROUP BY d.DOCTORNAME;
+
+--Query 3
+-- This table shows the diagnosis description for each patient along with the number of medications they take for it. The data is ordered by Patient ID and also includes Patient Name.
+
+SELECT p.PatientID, p.PatientName, d.DiagnosisDescription, COUNT(DISTINCT rx.MedicationID) as total_medication
+FROM PatientDiagnosis pd
+    JOIN Diagnosis d ON pd.DiagnosisID = d.DiagnosisID
+    JOIN Patient p on pd.PatientID = p.PatientID
+    JOIN Prescription rx ON pd.PatientID = rx.PatientID
+GROUP BY p.PatientID, p.PatientName, d.DIAGNOSISDESCRIPTION;
+
+--------------------------------------------------------------
+-- DATA QUERIES (Mi Swan)
+--------------------------------------------------------------
+
+--Insert a new bill for new patient
+INSERT INTO Billing (
+    billingID, amount, billingDate, paymentStatus,
+    insuranceClaimed, patientID)
+VALUES (
+    'BIL006', 125.00, SYSDATE, 'Due', 'No', 'PAT002');
+
+--Lists referrals from most recent to oldest.
+SELECT referralID, referralDate, referralStatus
+FROM Referral
+ORDER BY referralDate DESC;
+
+--Shows only doctors who made more than 1 referral.
+SELECT referringDoctorID, COUNT(*) AS num_referrals
+FROM Referral
+GROUP BY referringDoctorID
+HAVING COUNT(*) > 1;
+
+--Shows doctors who have not issued any referrals.
+SELECT d.doctorID, d.doctorName
+FROM Doctor d
+LEFT JOIN Referral r ON d.doctorID = r.referringDoctorID
+WHERE r.referralID IS NULL;
+
+--Lists all referrals directed to cardiologists.
+SELECT r.referralID, r.referredTo, d.speciality
+FROM Referral r
+JOIN Doctor d ON r.specialistDoctorID = d.doctorID
+WHERE d.speciality = 'CARDIOLOGIST';
+
+--------------------------------------------------------------
+-- DATA QUERIES (Aishwarya)
+--------------------------------------------------------------
+
+--Shows how many prescriptions each doctor has written.
+SELECT prescribedBy, COUNT(*) AS total_prescribed
+FROM Prescription
+GROUP BY prescribedBy;
+
+--Shows test history for a specific patient.
+SELECT testID, testType, resultSummary, testDate
+FROM Test
+WHERE patientID = 'PAT003';
+
+--Filters and sorts radiology-related tests.
+SELECT testID, testType, resultSummary
+FROM Test
+WHERE testType IN ('MRI', 'X-Ray')
+ORDER BY testDate DESC;
+
+--Modifies the dosage for a specific medication.
+UPDATE Medication
+SET dosage = '1000mg'
+WHERE medicationID = 'MED004';
+SELECT * FROM MEDICATION;
+
+--Displays each patient's name, the name of the medication they were prescribed, and the prescription period.
+SELECT 
+    p.PATIENTNAME,
+    m.Name AS medicationName,
+    pr.startDate,
+    pr.endDate
+FROM Prescription pr
+JOIN Patient p     ON pr.patientID = p.patientID
+JOIN Medication m  ON pr.medicationID = m.medicationID
+ORDER BY p.PATIENTNAME, pr.startDate DESC;
